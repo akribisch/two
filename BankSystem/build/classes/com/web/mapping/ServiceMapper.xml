@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.ServiceDao">
+	
+	<!-- 动态分页查询 -->
+	<select id="select" resultType="Service" parameterType="com.web.util.Page">
+		select 
+			s.sername
+		from
+			 service s
+		where  
+			1 = 1
+			<if test="obj.serId != 0">
+				and serid = #{serId}
+			</if>
+		limit #{startIndex},#{pageSize}
+	</select>
+	
+	<!-- 动态分页查询总条数 -->
+	<select id="selectCount" resultType="int" >
+		select 
+			count(s.sername) 
+		from
+			 service s
+	</select>
+	
+	<!-- 业务类型全查 -->
+	<select id="selectAll" resultType="Service">
+		SELECT * FROM service
+	</select>
+	
+	<!-- 添加 -->	
+	<insert id="insertService" parameterType="Service">
+		insert into service(sername) 
+		values(#{sername})
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="updateServiceById" parameterType="Service">
+		update service 
+			<set>
+				<if test="serName != null">
+					sername = #{serName}
+				</if>
+			</set>
+			where serid = #{serId}
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="deleteServiceById" parameterType="int">
+		delete service where serid = #{serId}
+	</delete>
+</mapper>

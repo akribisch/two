@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.BankMenuDao">
+	<select id="findParent" parameterType="integer" resultType="BankMenu">
+		select menuid,menuname,menulevel,parentid,menuUrl  
+		from bankmenu 
+		where 1=1 
+		<if test="_parameter!=null">
+			and parentid=#{parentId}
+		</if>
+		<if test="_parameter==null">
+			and parentid is null
+		</if>
+	</select>
+	<select id="findMenu" parameterType="integer" resultType="integer">
+		select menuid from station_menu where statid=#{statId}
+	</select>
+	<insert id="insertMenu" parameterType="java.util.Map">
+		insert into station_menu(statid,menuId) values(#{statId},#{menuId})
+	</insert>
+	<insert id="insertBankMenu" parameterType="BankMenu">
+		insert into bankmenu(menuname,menulevel,parentid,menuurl) values(#{menuName},#{menuLevel},#{parentId},#{menuUrl})
+	</insert>
+	<delete id="deleteMenu" parameterType="integer">
+		delete from station_menu where statid=#{statId}
+	</delete>
+</mapper>

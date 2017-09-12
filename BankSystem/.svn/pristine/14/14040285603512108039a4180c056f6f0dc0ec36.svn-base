@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.FlowDao" >
+
+	<!-- 	Flow的自定义结果集返回类型 -->
+	<resultMap type="Flow" id="resultFlowMap">
+	
+		<!-- 	结果集主键 -->
+		<id property="flowId" column="flowid"/>
+		
+		<result property="money" column="money"/>
+		<result property="flowDate" column="flowdate"/>
+		
+		<!-- 	储蓄卡表实体类对象 -->
+		<association property="savings" javaType="Savings">
+			<id property="savingsId" column="savingsid"/>
+			<result property="savingsNum" column="savingsnum"/>
+		</association>
+		
+		<!--  业务类型表实体类对象 -->
+		<association property="service" javaType="Service">
+			<id property="serId" column="serid"/>
+			<result property="serName" column="sername"/>
+		</association>
+		
+		<!-- 	员工表实体类对象  -->
+		<association property="staff" javaType="Staff">
+			<id property="staffId" column="staffid"/>
+		</association>
+		
+		<!-- 	提成表实体类对象 -->
+		<association property="commission" javaType="Commission">
+			<id property="commissionId" column="commissionid"/>
+			<result property="commissionType" column="commissiontype"/>
+			<result property="commissionRate" column="commissionrate"/>
+		</association>
+	
+	</resultMap>
+	
+	<!-- 全查 -->
+	<select id="selectAll" resultMap="resultFlowMap">
+		SELECT 
+			f.flowid,
+			f.money,
+			f.flowdate,
+			sav.savingsnum,
+			ser.serid,
+			ser.sername,
+            sta.staffid,
+			com.CommissionRate,
+			com.CommissionType 
+		FROM 
+			flow f,
+			savings sav,
+			staff sta,
+			commission com,
+			service ser
+		where 
+			f.savingsid = sav.savingsid 
+			and f.CommissionID = com.CommissionID
+			and f.serid = ser.serid
+            and f.staffid = sta.staffid
+	</select>
+	
+	<!-- 动态分页查询 -->
+	<select id="select" resultMap="resultFlowMap" parameterType="com.web.util.Page">
+		SELECT 
+			f.flowid,
+			f.money,
+			f.flowdate,
+			sav.savingsnum,
+			ser.serid,
+			ser.sername,
+            sta.staffid,
+			com.CommissionRate,
+			com.CommissionType 
+		FROM 
+			flow f,
+			savings sav,
+			staff sta,
+			commission com,
+			service ser
+		where 
+			1 = 1
+			<!-- 业务类型查询条件 -->
+			<if test="obj.service.serId != 0">
+				and f.serid	= #{obj.service.serId}
+			</if>
+			<!-- 起始时间查询条件 -->
+			<if test="map.beginDate != null and map.beginDate != ''">
+				and f.flowdate <![CDATA[>=]]> #{map.beginDate}
+			</if>
+			<!-- 结束时间查询条件 -->
+			<if test="map.endDat != null and map.endDate != ''">
+				and f.flowdate <![CDATA[<=]]> #{map.beginDate}
+			</if>
+			and f.savingsid = sav.savingsid 
+			and f.CommissionID = com.CommissionID
+			and f.serid = ser.serid
+            and f.staffid = sta.staffid
+         limit #{startIndex},#{pageSize}
+	</select>
+	
+	<!-- 动态分页查询的总条目数 -->
+	<select id="selectCount" resultType="int" parameterType="com.web.util.Page">
+		select 
+			count(f.flowid) 
+		from
+			flow f,
+			savings sav,
+			staff sta,
+			commission com,
+			service ser
+        where
+        	1 = 1
+        	<!-- 业务类型查询条件 -->
+			<if test="obj.service.serId != 0">
+				and f.serid	= #{obj.service.serId}
+			</if>
+			<!-- 起始时间查询条件 -->
+			<if test="map.beginDate != null and map.beginDate != ''">
+				and f.flowdate <![CDATA[>=]]> #{map.beginDate}
+			</if>
+			<!-- 结束时间查询条件 -->
+			<if test="map.endDate != null and map.endDate != ''">
+				and f.flowdate <![CDATA[<=]]> #{map.beginDate}
+			</if>
+			and f.savingsid = sav.savingsid 
+			and f.CommissionID = com.CommissionID
+			and f.serid = ser.serid
+            and f.staffid = sta.staffid
+	</select>
+	<!-- 添加 -->
+	<insert id="insertFlow" parameterType="Flow">
+		INSERT INTO flow (savingsid, serid, staffid, flowdate, money,CommissionID) 
+		VALUES (#{savings.savingsId},#{service.serId},#{staff.staffId},#{flowDate},#{money},#{commission.commissionId})
+	</insert>
+	<!-- 修改 -->
+	<update id="updateById" parameterType="Flow">
+	update flow 
+		<set>
+			<if test="money != -1">
+				money = #{money},
+			</if>
+			<if test="flowDate != null">
+				flowdate = #{flowdate},
+			</if>
+			<if test="savings.savingsId != -1">
+				savingsid = #{savings.savingsId},
+			</if>
+			<if test="service.serId != -1">
+				serid = #{service.serId},
+			</if>
+			<if test="staff.staffId != -1">
+				staffid = #{staff.staffId}
+			</if>
+			<if test="commission.commissionId != -1">
+				CommissionID = #{commission.commissionId}
+			</if>
+		</set>
+		where flowid = #{flowId}
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="deleteById" parameterType="int">
+		delete flow where flowid = #{flowId}
+	</delete>
+</mapper>

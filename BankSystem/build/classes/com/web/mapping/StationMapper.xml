@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.StationDao">
+	
+	<!-- Station的自定义结果集返回类型 -->
+	<resultMap type="Station" id="resultMapOfStation">
+		<!-- 结果集主键 -->
+		<id property="statId" column="statid"/>
+		
+		<result property="statName" column="statname"/>
+		<result property="statNum" column="statnum"/>
+		
+		<!-- 部门表实体类对象 -->
+		<association property="department" javaType="Department">
+			<id property="depId" column="depid"/>
+			<result property="depName" column="depname"/>
+			
+			<!-- 银行表实体类对象 -->
+			<association property="bank" javaType="Bank">
+				<id property="bankId" column="bankid"/>
+				<result property="bankName" column="bankname"/>
+			</association>
+		</association>
+	</resultMap>
+	
+	<!-- 动态分页查询  -->
+	<select id="select" parameterType="java.util.Map" resultMap="resultMapOfStation">
+		select
+			si.statid,
+			si.statname,
+			si.statNum,
+			dep.depid,
+			dep.depname,
+			b.bankid,
+			b.bankname
+		from
+			station si,
+			department dep,
+			bank b
+		where 1 = 1
+			<!-- 岗位名称查询条件 -->
+			<if test="statName != null">
+				and si.statName like CONCAT(CONCAT('%', #{statName}), '%')
+			</if>
+			<!-- 大于人数查询条件 -->
+			<if test="minNum != null">
+				and si.statNum <![CDATA[>=]]> #{minNum}
+			</if>
+			<!-- 小于人数查询条件 -->
+ 			<if test="maxNum != null">
+ 				and si.statNum <![CDATA[<=]]> #{maxNum}
+ 			</if>
+ 			<!-- 部门编号查询条件 -->
+			<if test="depId != null and depId !=0">
+				and si.depid = #{depId}
+			</if>
+			<!-- 银行编号查询条件 -->
+ 			<if test="bankId != null and bankId !=0">
+ 				and dep.bankid <![CDATA[<=]]> #{bankId}
+ 			</if>
+ 			and si.depid = dep.depid
+			and dep.bankid = b.bankid
+		limit #{startIndex},#{pageSize}
+	</select>
+	
+	<!-- 动态分页查询的总条目数  -->
+	<select id="selectCount" parameterType="java.util.Map" resultType="int">
+		select
+			count(si.statid)
+		from
+			station si,
+			department dep,
+			bank b
+		where 1 = 1
+			<!-- 岗位名称查询条件 -->
+			<if test="statName != null">
+				and si.statName like CONCAT(CONCAT('%', #{statName}), '%')
+			</if>
+			<!-- 大于人数查询条件 -->
+			<if test="minNum != null">
+				and si.statNum <![CDATA[>=]]> #{minNum}
+			</if>
+			<!-- 小于人数查询条件 -->
+ 			<if test="maxNum != null">
+ 				and si.statNum <![CDATA[<=]]> #{maxNum}
+ 			</if>
+ 			<!-- 部门编号查询条件 -->
+			<if test="depId != null and depId !=0">
+				and si.depid = #{depId}
+			</if>
+			<!-- 银行编号查询条件 -->
+ 			<if test="bankId != null and bankId !=0">
+ 				and dep.bankid <![CDATA[<=]]> #{bankId}
+ 			</if>
+ 			and si.depid = dep.depid
+			and dep.bankid = b.bankid
+	</select>
+	
+	<!-- 根据主键查询  -->
+	<select id="selectById" parameterType="int" resultMap="resultMapOfStation">
+		select
+			si.statid,
+			si.statname,
+			si.statNum,
+			dep.depid,
+			dep.depname,
+			b.bankid,
+			b.bankname
+		from
+			station si,
+			department dep,
+			bank b
+		where 1 = 1
+			and si.statid = #{statId}
+ 			and si.depid = dep.depid
+			and dep.bankid = b.bankid
+	</select>
+	
+	<!-- 添加 -->
+	<insert id="insert" parameterType="Station">
+		insert into station(statname,statnum,depid) 
+		values(#{statName},#{statNum},#{department.depId})
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="deleteById" parameterType="int">
+		delete from station where statid = #{statId}
+	</delete>
+	
+	<!-- 修改 -->
+	<update id="updateById" parameterType="Station">
+		update station
+		<set>
+			<if test="statName != null and statName != ''">
+				statname = #{statName}
+			</if>
+			<if test="statNum != 0">
+				statnum = #{statNum}
+			</if>
+			<if test="department.depId != 0">
+				depid = #{department.depId}
+			</if>
+		</set>
+		where statid = #{statId}
+	</update>
+	
+	<!-- 全查询  -->
+	<select id="selectAll" resultMap="resultMapOfStation">
+		select
+			si.statid,
+			si.statname,
+			si.statNum,
+			dep.depid,
+			dep.depname,
+			b.bankid,
+			b.bankname
+		from
+			station si,
+			department dep,
+			bank b
+		where si.depid = dep.depid
+			and dep.bankid = b.bankid
+	</select>
+	
+</mapper>

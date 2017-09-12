@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.AccessDao">
+	
+	<!-- Access的自定义结果集返回类型 -->
+	<resultMap type="Access" id="resultMapOfAccess">
+		<!-- 结果集主键 -->
+		<id property="accessId" column="accessid"/>
+	
+		<result property="money" column="money"/>
+		<result property="currentTime" column="currenttime"/>
+		
+		<!-- 储蓄卡表实体类对象 -->
+		<association property="savings" javaType="Savings">
+			<id property="savingsId" column="savingsid"/>
+			<result property="savingsNum" column="savingsnum"/>
+		</association>
+		
+		<!-- 业务类型表实体类对象 -->
+		<association property="service" javaType="Service">
+			<id property="serId" column="serid"/>
+			<result property="serName" column="sername"/>
+		</association>
+		
+		<!-- 银行表实体类对象 -->
+		<association property="bank" javaType="Bank">
+			<id property="bankId" column="bankid"/>
+			<result property="bankName" column="bankname"/>
+		</association>
+		
+		<!-- 员工表实体类对象 -->
+		<association property="staff" javaType="Staff">
+			<id property="staffId" column="staffid"/>
+			<result property="staffName" column="staffname"/>
+		</association>
+	</resultMap>
+	
+	<!-- 全查询 -->
+	<select id="selectAll" resultMap="resultMapOfAccess" parameterType="com.web.util.Page">
+		select 
+			a.accessid,
+			a.money,
+			a.currenttime,
+			sav.savingsid,
+			sav.savingsnum,
+			ser.serid,
+			ser.sername,
+			b.bankid,
+			b.BankName,
+			sta.staffid,
+			sta.staffname
+		from 
+			Access a,
+			savings sav,
+			service ser,
+			staff sta,
+			bank b
+		where 
+			a.savingsid = sav.savingsid 
+			and a.funid = ser.serid 
+			and a.bankid = b.bankid 
+			and a.staffid = sta.staffid
+		limit #{startIndex},#{pageSize}
+	</select>
+	
+	<!-- 动态分页查询 -->
+	<select id="select" resultMap="resultMapOfAccess" parameterType="com.web.util.Page">
+		select 
+			a.accessid,
+			a.money,
+			a.currenttime,
+			sav.savingsid,
+			sav.savingsnum,
+			ser.serid,
+			ser.sername,
+			b.bankid,
+			b.BankName,
+			sta.staffid,
+			sta.staffname
+		from 
+			Access a,
+			savings sav,
+			service ser,
+			staff sta,
+			bank b
+		where 1 = 1
+			<!-- 存取款表编号查询条件 -->
+			<if test="obj.accessId != 0">
+				and a.accessid = #{obj.accessId}			
+			</if>
+			<!-- 储蓄卡表编号查询条件 -->
+			<if test="obj.savings.savingsId != 0">
+				and a.savingsid = #{obj.savings.savingsId}			
+			</if>
+			<!-- 业务类型查询条件 -->
+			<if test="obj.service.serId != 0">
+				and a.funid = #{obj.service.serId}
+			</if>
+			<!-- 起始时间查询条件 -->
+			<if test="map.beginDate != null and map.beginDate != ''">
+				and a.currenttime <![CDATA[>=]]> #{map.beginDate}
+			</if>
+			<!-- 结束时间查询条件 -->
+ 			<if test="map.endDate != null and map.endDate != ''">
+ 				and a.currenttime <![CDATA[<=]]> #{map.endDate}
+ 			</if>
+			and a.savingsid = sav.savingsid 
+			and a.funid = ser.serid 
+			and a.bankid = b.bankid 
+			and a.staffid = sta.staffid
+		limit #{startIndex},#{pageSize}
+	</select>
+	
+	<!-- 动态分页查询的总条目数 -->
+	<select id="selectCount" resultType="int" parameterType="com.web.util.Page">
+		select 
+			count(a.savingsid)
+		from 
+			Access a
+		where 1 = 1
+			<!-- 存取款表编号查询条件 -->
+			<if test="obj.accessId != 0">
+				and a.accessid = #{obj.accessId}			
+			</if>
+			<!-- 储蓄卡表编号查询条件 -->
+			<if test="obj.savings.savingsId != 0">
+				and a.savingsid = #{obj.savings.savingsId}			
+			</if>
+			<!-- 业务类型查询条件 -->
+			<if test="obj.service.serId != 0">
+				and a.funid = #{obj.service.serId}
+			</if>
+			<!-- 起始时间查询条件 -->
+			<if test="map.beginDate != null and map.beginDate != ''">
+				and a.currenttime <![CDATA[>=]]> #{map.beginDate}
+			</if>
+			<!-- 结束时间查询条件 -->
+ 			<if test="map.endDate != null and map.endDate != ''">
+ 				and a.currenttime <![CDATA[<=]]> #{map.endDate}
+ 			</if>
+	</select>
+	
+	<!-- 添加 -->
+	<insert id="insert" parameterType="Access">
+		insert into Access(savingsid,funid,money,currenttime,bankid,staffid) 
+		values(#{savings.savingsId},#{service.serId},#{money},#{currentTime},#{bank.bankId},#{staff.staffId})
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="deleteById" parameterType="int">
+		delete from Access where accessid = #{accessId}
+	</delete>
+	
+	<!-- 修改 -->
+	<update id="updateById" parameterType="Access">
+		update Access
+		<set>
+			<if test="savings.savingsId != 0">
+				savingsid = #{savings.savingsId}
+			</if>
+			<if test="service.serId != 0">
+				funid = #{service.serId}
+			</if>
+			<if test="money != 0">
+				money = #{money}
+			</if>
+			<if test="currentTime != null">
+				currenttime = #{currentTime}
+			</if>
+			<if test="bank.bankId != 0">
+				bankid = #{bank.bankId}
+			</if>
+			<if test="staff.staffId != 0">
+				staffid = #{staff.staffId}
+			</if>
+		</set>
+		where accessid = #{accessId}
+	</update>
+	
+</mapper>

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.SavingsDao">
+
+	<!-- Savings的自定义结果集返回类型 -->
+	<resultMap type="Savings" id="resultAllSavings">
+		<!-- 结果集主键 -->
+		<id property="savingsId" column="savingsid"/>
+		<result property="savingsNum" column="savingsnum"/>
+		<result property="balance" column="balance"/>
+		
+		<!-- 用户表实体类对象 -->
+		<association property="user" javaType="User">
+			<id property="userId" column="userid"/>
+			<result property="username" column="username"/>
+		</association>
+		
+		<!-- 银行表实体类对象 -->
+		<association property="bank" javaType="Bank">
+			<id property="bankId" column="bankid"/>
+			<result property="bankName" column="bankname"/>
+		</association>
+		
+		<!-- 员工实体类对象 -->
+		<association property="staff" javaType="Staff">
+			<id property="staffId" column="staffid"/>
+			<result property="staffName" column="staffname"/>
+		</association>
+		
+		<!-- 账号状态实体类对象 -->
+		<association property="savState" javaType="SavState">
+			<id property="savId" column="savid"/>
+			<result property="savStat" column="savstat"/>
+		</association>
+		
+		<!--利率实体类对象 -->
+		<association property="interest" javaType="Interest">
+			<id property="interestId" column="interestid"/>
+			<result property="interestName" column="interestname"/>
+		</association>
+	</resultMap>
+	<!-- 全查询 -->
+	<select id="queryAll" resultMap="resultAllSavings" parameterType="com.web.util.Page">
+		select
+		 t.savingsid,
+		 t.savingsnum,
+		 t1.username,
+		 t.balance,
+		 t2.BankName,
+		 t3.staffname,
+		 t4.savstat,
+		 t5.interestname
+		from
+		 savings t,
+		 User t1,
+		 bank t2,
+		 staff t3,
+		 savstate t4,
+		 interest t5
+		where 
+		t.userid = t1.userid 
+		and t.bankid = t2.bankid 
+		and t.staffid = t3.staffid 
+		and t.savid = t4.savid 
+		and t.interestid = t5.interestid
+		limit #{startIndex},#{pageSize}
+	</select>
+	<!-- 动态分页查询 -->
+	<select id="queryPage" resultMap="resultAllSavings" parameterType="com.web.util.Page">
+		select
+		 t.savingsid,
+		 t.savingsnum,
+		 t1.username,
+		 t.balance,
+		 t2.BankName,
+		 t3.staffname,
+		 t4.savstat,
+		 t5.interestname
+		from
+		 savings t,
+		 User t1,
+		 bank t2,
+		 staff t3,
+		 savstate t4,
+		 interest t5
+		where  t.userid = t1.userid 
+			and t.bankid = t2.bankid 
+			and t.staffid = t3.staffid 
+			and t.savid = t4.savid 
+			and t.interestid = t5.interestid
+		 <!-- 储蓄卡编号查询条件 -->
+		 <if test="obj.savingsId != 0">
+			and t.savingsid = #{obj.savingsId}			
+		 </if>
+		 <!-- 卡号查询条件 -->
+		 <if test="obj.savingsNum != null and obj.savingsNum != ''">
+			and t.savingsnum = #{obj.savingsNum}			
+		 </if>
+			limit #{startIndex},#{pageSize}
+			
+	</select>
+	
+	<!-- 动态分页查询的总条目数 -->
+	<select id="selectCount" resultType="int" parameterType="com.web.util.Page">
+		select
+		 count(t1.userid)
+		from
+		 savings t,
+		 User t1,
+		 bank t2,
+		 staff t3,
+		 savstate t4,
+		 interest t5
+		where 1 = 1
+			<!-- 储蓄卡编号查询条件 -->
+		 <if test="obj.savingsId != 0">
+			and t.savingsid = #{obj.savingsId}			
+		 </if>
+		 <!-- 卡号查询条件 -->
+		 <if test="obj.savingsNum != null and obj.savingsNum != ''">
+			and t.savingsnum = #{obj.savingsNum}			
+		 </if>
+			and t.userid = t1.userid 
+			and t.bankid = t2.bankid 
+			and t.staffid = t3.staffid 
+			and t.savid = t4.savid 
+			and t.interestid = t5.interestid
+	</select>
+	<!-- 添加 -->
+	<insert id="add" parameterType="Savings">
+		insert into Savings(savingsnum,userid,password,balance,savid,bankid,staffid,interertid) values(#{savingsnum},#{user.userid},#{password},#{balance},#{savState.savid},#{bank.bankid},#{staff.staffid},#{interest.interertid})
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="deleteSavings" parameterType="int">
+		delect from Savings where savingsid =#{savingsId}
+	</delete>
+	
+	<!-- 修改 -->
+	<update id="updateSavings" parameterType="Savings">
+		update Savings 
+		<set>
+			<if test="savingsNum != null">
+				savingsnum = #{savingsNum},
+			</if>
+			<if test="user!= null">
+				userid = #{user.userId},
+			</if>
+			<if test="password!= null">
+				password = #{password},
+			</if>
+			<if test="balance!= -1">
+				balance = #{balance},
+			</if>
+			<if test="bank!= null">
+				bankid = #{bank.bankId},
+			</if>
+			<if test="staff!= null">
+				staffid = #{staff.staffId},
+			</if>
+			<if test="savState!=null">
+				savid = #{staff.savId},
+			</if>
+			<if test="interest!= null">
+				interestid = #{interest.interestId},
+			</if>
+		</set>
+		where savingsid = #{savingsId}
+	
+	</update>
+	<!-- 根据储蓄卡卡号查询对应的在表中的主键编号 -->
+	<select id="findByNumForId" resultType="int" parameterType="int">
+		select savingsid from savings where savingsnum = #{savingsNum}
+	</select>
+	
+	<!-- 登录 -->
+	<select id="findBySavings" parameterType="Savings" resultMap="resultAllSavings">
+		select
+			 t.savingsid,
+			 t.savingsnum,
+			 t1.username,
+			 t.balance,
+			 t2.BankName,
+			 t3.staffname,
+			 t4.savstat,
+			 t5.interestname
+			from
+			 savings t,
+			 User t1,
+			 bank t2,
+			 staff t3,
+			 savstate t4,
+			 interest t5
+			where  t.userid = t1.userid 
+				and t.bankid = t2.bankid 
+				and t.staffid = t3.staffid 
+				and t.savid = t4.savid 
+				and t.interestid = t5.interestid
+				and t.savingsnum = #{savingsNum}
+				and t.password = #{password}
+	</select>
+	<!-- 通过主键查找卡号 -->
+	<select id="findBySavingsid" resultType="String" parameterType="int">
+	select savingsnum from savings where savingsid = #{savingsId}
+	</select>
+	<!-- 根据主键查询 -->
+	<select id="selectById" resultMap="resultAllSavings" parameterType="int">
+		select
+		 t.savingsid,
+		 t.savingsnum,
+		 t1.username,
+		 t.balance,
+		 t2.BankName,
+		 t3.staffname,
+		 t4.savstat,
+		 t5.interestname
+		from
+		 savings t,
+		 User t1,
+		 bank t2,
+		 staff t3,
+		 savstate t4,
+		 interest t5
+		where t.savingsid = #{savingsId}			
+			and t.userid = t1.userid 
+			and t.bankid = t2.bankid 
+			and t.staffid = t3.staffid 
+			and t.savid = t4.savid 
+			and t.interestid = t5.interestid
+	</select>
+</mapper>

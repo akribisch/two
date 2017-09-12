@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.FinalKindDao">
+<!-- 添加产品种类 -->
+	<insert id="insertFinalKind" parameterType="FinalKind">
+		insert into finalkind (fkname) values (#{fkName})
+	</insert>
+	<!-- 查询产品种类 -->
+	<select id="findAllKind"  parameterType="java.util.Map" resultType="FinalKind">
+		select fkId,fkName from finalkind where 1=1
+		<if test="fkName!=null">
+    		and fkName like CONCAT('%',CONCAT(#{fkName},'%'))
+    	</if>
+    	  LIMIT #{prev},#{pageSize}
+	</select>
+	<!-- 查询产品种类记录总数 -->
+	<select id="getFinalKindTotalCount" parameterType="java.util.Map" resultType="int">
+    	SELECT count(*) FROM bank.finalkind where 1=1
+    	<if test="fkName!=null">
+    		and fkName like CONCAT('%',CONCAT(#{fkName},'%'))
+    	</if>
+    	
+    </select>
+    <!-- 根据编号查询 -->
+    <select id="queryFinalKindById" parameterType="java.lang.Integer"  resultType="FinalKind">
+    	SELECT * FROM bank.finalkind where fkId=#{fkId}
+    	
+    </select>
+	<update id="updateFinalKind" parameterType="FinalKind">
+		update finalkind set fkname=#{fkName} where fkid=#{fkId}
+	</update>
+	<delete id="deleteFinalKind" parameterType="int">
+		delete from finalkind where fkid=#{fkId}
+	</delete>
+	<!-- 查询全部金融类型 -->
+	
+   <select id="getAllFinalKind" resultType="com.web.entity.FinalKind">
+   	select * from finalkind;
+   </select>
+</mapper>

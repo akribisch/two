@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.FinancialDao">
+	<resultMap type="Financial" id="resultFinancial">
+		<id column="finId" property="finId"/>
+		<result column="finname" property="finName"/>
+		<association property="finalKind">
+			<id column="fkid" property="fkId"/>
+			<result column="fkname" property="fkName"/>
+		</association>
+	</resultMap>
+	<insert id="insertFinancial" parameterType="Financial">
+		insert into financial (finname,fkid) values (#{finName},#{finalKind.fkId})
+	</insert>
+	<update id="updateFinancial" parameterType="Financial">
+		update financial set finname=#{finName},fkid=#{finalKind.fkId} where finid=#{finId}
+	</update>
+	<delete id="deleteFinancial" parameterType="int">
+		delete from financial where finId=#{finId}
+	</delete>
+	<select id="findAll" resultMap="resultFinancial">
+		select f.finId,f.finname,k.fkid,k.fkname from finalkind k,financial f where k.fkid=f.fkid
+	</select>
+</mapper>

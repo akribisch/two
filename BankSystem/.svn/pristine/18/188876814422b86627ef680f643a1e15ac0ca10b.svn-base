@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.DepartmentDao">
+	
+	<!-- Department的自定义结果集返回类型 -->
+	<resultMap type="Department" id="resultOfDepartment">
+		<id property="depId" column="depid"/>
+		
+		<result property="depName" column="depname"/>
+		<result property="depNum" column="depnum"/>
+		<result property="depFunc" column="depfunc"/>
+		
+		<!-- 银行实体类 -->
+		<association property="bank" javaType="Bank">
+			<id property="bankId" column="bankid"/>		
+			<result property="bankName" column="bankname"/>
+		</association>
+	</resultMap>
+	
+	<!-- 动态分页查询  -->
+	<select id="select" parameterType="com.web.util.Page" resultMap="resultOfDepartment">
+		select
+			dep.depid,
+			dep.depname,
+			dep.depnum,
+			dep.depfunc,
+			dep.bankid,
+			b.bankname
+		from
+			department dep,
+			bank b
+		where 1 = 1
+		<if test="map!=null">
+			<!-- 部门名称查询条件 -->
+			<if test="map.depName != null and map.depName != ''">
+				and dep.depname like CONCAT(CONCAT('%', #{map.depName}), '%')
+			</if>
+			and dep.bankid = b.bankid
+		limit #{startIndex},#{pageSize}
+		</if>
+	</select>
+	
+	<!-- 动态分页查询的总条目数  -->
+	<select id="selectCount" parameterType="com.web.util.Page" resultType="int">
+		select
+			count(dep.depid)
+		from
+			department dep,
+			bank b
+		where 1 = 1
+			<!-- 部门名称查询条件 -->
+			<if test="map.depName != null and map.depName != ''">
+				and dep.depname like CONCAT(CONCAT('%', #{map.depName}), '%')
+			</if>
+ 			and dep.bankid = b.bankid
+	</select>
+	
+	<!-- 根据主键查询  -->
+	<select id="selectById" parameterType="int" resultMap="resultOfDepartment">
+		select
+			dep.depid,
+			dep.depname,
+			dep.depnum,
+			dep.depfunc,
+			dep.bankid,
+			b.bankname
+		from
+			department dep,
+			bank b
+		where 1 = 1
+			and dep.depid = #{depId}
+			and dep.bankid = b.bankid
+	</select>
+	
+	<!-- 添加 -->
+	<insert id="insert" parameterType="Department">
+		insert into department(depname,depnum,depfunc,bankid) 
+		values(#{depName},#{depNum},#{depFunc},#{bank.bankId})
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="deleteById" parameterType="int">
+		delete from department where depid = #{depId}
+	</delete>
+	
+	<!-- 修改 -->
+	<update id="updateById" parameterType="Department">
+		update department 
+		<set>
+			<if test="depName != null and depName != ''">
+				depname = #{depName},
+			</if>
+			<if test="depNum != 0">
+				depnum = #{depNum}, 
+			</if>
+			<if test="depFunc != null and depFunc != ''">
+				depfunc = #{depFunc}, 
+			</if>
+			<if test="bank!= null">
+				bankid = #{bank.bankId} 
+			</if>
+		</set>
+		where depid = #{depId}
+	</update>
+	
+	<!-- 全查询  -->
+	<select id="selectAll" resultMap="resultOfDepartment">
+		select
+			dep.depid,
+			dep.depname,
+			dep.depnum,
+			dep.depfunc,
+			dep.bankid,
+			b.bankname
+		from
+			department dep,
+			bank b
+		where dep.bankid = b.bankid
+	</select>
+	
+</mapper>

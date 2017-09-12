@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.FinalRecordDao">
+
+	<resultMap type="com.web.entity.FinalRecord" id="recordResult">
+		<id column="finrecordid" property="finRecordId"/>
+		<result column="finmoney" property="finMoney"/>
+		<result column="finfirstdate" property="finFirstDate"/>
+		<result column="finenddate" property="finEndDate"/>
+		<association property="savings">
+			<id column="savingsid" property="savingsId"/>
+			<result column="savingsnum" property="savingsNum"/>
+		</association>
+		<association property="financial">
+			<id column="finid" property="finId"/>
+			<result column="finname" property="finName"/>
+		</association>
+	</resultMap>
+	<insert id="insertFinalRecord" parameterType="com.web.entity.FinalRecord">
+		insert into finalRecord (finid,finmoney,savingsid,finfirstdate,finenddate) 
+		values (#{financial.finId},#{finMoney},#{savings.savingsId},#{finFirstDate},#{finEndDate})
+	</insert>
+	<select id="findAllRecord" resultMap="recordResult" parameterType="int">
+		select f.finrecordid,f.finid,fin.finname,f.finmoney,s.savingsid,s.savingsnum,f.finfirstdate,f.finenddate 
+		from finalrecord f,savings s,financial fin 
+		where f.savingsid=#{savingsId} and fin.finid=f.finid and s.savingsid=f.savingsid
+	</select>
+	<update id="updateFinalRecord" parameterType="com.web.entity.FinalRecord">
+		update finalrecord set finid=#{financial.finId},finmoney=#{finMoney},savingsid=#{savings.savingsId},
+		finfirstdate=#{finFirstDate},finenddate=#{finEndDate} where finrecordid=#{finRecordId}
+	</update>
+	<delete id="deleteFinalRecord" parameterType="int">
+		delete from finalrecord where finrecordid=#{finRecordId}
+	</delete>
+</mapper>

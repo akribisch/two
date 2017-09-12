@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.InterestDao">
+	<!-- 新增利率 -->
+ 	<insert id="addInterest" parameterType="com.web.entity.Interest">
+		insert into bank.interest (interestname,interest,interestCycle) values 
+		 (#{interestName},#{interest},#{interestCycle})
+	</insert>
+	
+	<!-- 分页查询利率 -->
+	 <select id="getInterest" parameterType="java.util.Map" resultType="Interest">
+		SELECT * FROM bank.interest WHERE 1=1
+		<if test="interestName!=null">
+			and interestName LIKE CONCAT('%',CONCAT(#{interestName},'%'))
+		</if>
+		<if test="interestCycle!=null">
+			and interestCycle=#{interestCycle}
+		</if>
+		<if test="interest!=null">
+			and interest=#{interest}
+		</if>
+		 LIMIT #{prev},#{pageSize}
+	</select>
+	
+	<select id="findCredit" resultType="Interest" parameterType="String">
+		select interestId,interestName,interest,interestCycle from interest where interestName like #{interestName}
+	</select>
+	
+	<!-- 查询利率记录总数 -->
+	<select id="getInterestTotalCount" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(*) FROM bank.interest WHERE 1=1 
+		<if test="interestName!=null">
+			and interestName LIKE CONCAT('%',CONCAT(#{interestName},'%'))
+		</if>
+		<if test="interestCycle!=null">
+			and interestCycle=#{interestCycle}
+		</if>
+		<if test="interest!=null">
+			and interest=#{interest}
+		</if>
+	</select>
+	
+	<!-- 根据编号删除利率记录 -->
+	<delete id="deleteInterestById" parameterType="int">
+		DELETE FROM bank.interest WHERE interestId=#{interestId}
+	</delete>
+	
+	<!--根据编号查询-->
+	<select id="sendUpdateInterest" parameterType="int" resultType="Interest">
+		SELECT * FROM bank.interest WHERE interestId=#{interestId}
+	</select>
+	
+	<!-- 根据编号修改利率记录 -->
+	<update id="updateInterest" parameterType="java.util.Map">
+		UPDATE interest 
+		<set>
+			<if test="interestName!=null" >
+				interestName=#{interestName},
+			</if>
+		
+			<if test="interest!=null">
+				interest=#{interest},
+			</if>
+		
+			<if test="interestCycle!=null">
+				interestCycle=#{interestCycle},
+			</if>
+		</set>
+		WHERE interestId=#{interestId}
+	</update>
+	
+</mapper>

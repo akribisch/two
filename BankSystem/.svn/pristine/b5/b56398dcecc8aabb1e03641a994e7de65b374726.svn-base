@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.StaffDao">
+	<!-- Staff的自定义结果集返回类型 -->
+	<resultMap type="Staff" id="resultMapOfStaff">
+		<!-- 结果集主键 -->
+		<id property="staffId" column="staffid"/>
+		
+		<result property="staffName" column="staffname"/>
+		<result property="sPhone" column="sphone"/>
+		<result property="ssex" column="ssex"/>
+		<result property="sbirthday" column="sbirthday"/>
+		<result property="sidcard" column="sidcard"/>
+		
+		<!-- 岗位表实体类对象 -->
+		<association property="station" javaType="Station">
+			<id property="statId" column="statid"/>
+			<result property="statName" column="statname"/>
+			
+			<!-- 部门表实体类对象 -->
+			<association property="department" javaType="Department">
+				<id property="depId" column="depid"/>
+				<result property="depName" column="depname"/>
+				
+				<!-- 银行表实体类对象 -->
+				<association property="bank" javaType="Bank">
+					<id property="bankId" column="bankid"/>
+					<result property="bankName" column="bankname"/>
+				</association>
+			</association>
+		</association>
+	</resultMap>
+	
+	<!-- 动态分页查询 -->
+	<select id="select" parameterType="com.web.util.Page" resultMap="resultMapOfStaff">
+		select
+			sf.staffid,
+			sf.staffname,
+			sf.sphone,
+			sf.ssex,
+			sf.sbirthday,
+			sf.sidcard,
+			si.statid,
+			si.statname,
+			dep.depid,
+			dep.depname,
+			b.bankid,
+			b.bankname
+		from
+			staff sf,
+			station si,
+			department dep,
+			bank b
+		where 1 = 1
+			<!-- 员工姓名模糊查询条件 -->
+			<if test="map.staffName != null">
+				and sf.staffname like CONCAT(CONCAT('%', #{map.staffName}), '%')
+			</if>
+			<!-- 员工性别查询条件 -->
+			<if test="map.ssex != -1">
+				and sf.ssex = #{map.ssex}
+			</if>
+			<!-- 员工身份证号模糊查询条件 -->
+			<if test="map.sidcard != null">
+				and sf.sidcard like CONCAT(CONCAT('%', #{map.sidcard}), '%')
+			</if>
+			<!-- 员工岗位查询条件 -->
+			<if test="map.statId != -1">
+				and sf.statid = #{map.statId}
+			</if>
+			<!-- 员工部门查询条件 -->
+			<if test="map.depId != -1">
+				and si.depid = #{map.depId}
+			</if>
+			<!-- 员工所属银行查询条件 -->
+			<if test="map.bankId != -1">
+				and dep.bankid = #{map.bankId}
+			</if>
+			and sf.statid = si.statid
+			and si.depid = dep.depid
+			and dep.bankid = b.bankid
+		limit #{startIndex},#{pageSize}
+	</select>
+	
+	<!-- 动态分页查询的总条目数 -->
+	<select id="selectCount" parameterType="com.web.util.Page" resultType="int">
+		select
+			count(sf.staffid)
+		from
+			staff sf,
+			station si,
+			department dep,
+			bank b
+		where 1 = 1
+			<!-- 员工姓名模糊查询条件 -->
+			<if test="map.staffName != null">
+				and sf.staffname like CONCAT(CONCAT('%', #{map.staffName}), '%')
+			</if>
+			<!-- 员工性别查询条件 -->
+			<if test="map.ssex != -1">
+				and sf.ssex = #{map.ssex}
+			</if>
+			<!-- 员工身份证号模糊查询条件 -->
+			<if test="map.sidcard != null">
+				and sf.sidcard like CONCAT(CONCAT('%', #{map.sidcard}), '%')
+			</if>
+			<!-- 员工岗位查询条件 -->
+			<if test="map.statId != -1">
+				and sf.statid = #{map.statId}
+			</if>
+			<!-- 员工部门查询条件 -->
+			<if test="map.depId != -1">
+				and si.depid = #{map.depId}
+			</if>
+			<!-- 员工所属银行查询条件 -->
+			<if test="map.bankId != -1">
+				and dep.bankid = #{map.bankId}
+			</if>
+			and sf.statid = si.statid
+			and si.depid = dep.depid
+			and dep.bankid = b.bankid
+	</select>
+	
+	<!-- 添加 -->
+	<insert id="insert" parameterType="Staff">
+		insert into staff(staffname,sphone,ssex,sbirthday,sidcard,statid,password) 
+		values(#{staffName},#{sPhone},#{ssex},#{sbirthday},#{sidcard},#{station.statId},#{password})
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="deleteById" parameterType="int">
+		delete from staff where staffid = #{staffId}
+	</delete>
+	
+	<!-- 修改 -->
+	<update id="updateById" parameterType="Staff">
+		update staff
+		<set>
+			<if test="staffName != null and staffName != ''">
+				staffname = #{staffName},
+			</if>
+			<if test="sPhone != null and sPhone != ''">
+				sphone = #{sPhone},
+			</if>
+			<if test="ssex != -1">
+				ssex = #{ssex},
+			</if>
+			<if test="sbirthday != null and sbirthday != ''">
+				sbirthday = #{sbirthday},
+			</if>
+			<if test="sidcard != null and sidcard != ''">
+				sidcard = #{sidcard},
+			</if>
+			<if test="station.statId != -1">
+				statid = #{station.statId},
+			</if>
+			<if test="password != null and password != ''">
+				password = #{password}
+			</if>
+		</set>
+		where staffid = #{staffId}
+	</update>
+	
+	<!-- 登陆 -->
+	<select id="login" parameterType="Staff" resultMap="resultMapOfStaff">
+		select
+			sf.staffid,
+			sf.staffname,
+			sf.sphone,
+			sf.ssex,
+			sf.sbirthday,
+			sf.sidcard,
+			si.statid,
+			si.statname,
+			dep.depid,
+			dep.depname,
+			b.bankid,
+			b.bankname
+		from
+			staff sf,
+			station si,
+			department dep,
+			bank b
+		where 1 = 1
+			and sf.staffname = #{staffName}
+			and sf.password = #{password}
+			and sf.statid = si.statid
+			and si.depid = dep.depid
+			and dep.bankid = b.bankid
+	</select>
+	
+	<!-- 根据主键查询 -->
+	<select id="selectById" parameterType="int" resultMap="resultMapOfStaff">
+		select
+			sf.staffid,
+			sf.staffname,
+			sf.sphone,
+			sf.ssex,
+			sf.sbirthday,
+			sf.sidcard,
+			si.statid,
+			si.statname,
+			dep.depid,
+			dep.depname,
+			b.bankid,
+			b.bankname
+		from
+			staff sf,
+			station si,
+			department dep,
+			bank b
+		where 1 = 1
+			and sf.staffid = #{staffId}
+			and sf.statid = si.statid
+			and si.depid = dep.depid
+			and dep.bankid = b.bankid
+	</select>
+	
+</mapper>

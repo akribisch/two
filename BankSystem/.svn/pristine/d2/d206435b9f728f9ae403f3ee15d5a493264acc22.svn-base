@@ -1,0 +1,86 @@
+.container-padding {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.container-widget .panel {
+    margin-bottom: 10px;
+}
+.panel-default {
+    border-color: #ddd;
+}
+
+.panel-title {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 16px;
+    color: inherit;
+}
+
+
+.panel-body {
+    padding: 15px;
+}
+
+.app {
+    width: 98%;
+    padding: 10px;
+    padding-bottom: 10px;
+}
+
+.app .approot {
+    font-size: 16px;
+    color: #03F;
+    margin-bottom: 10px;
+}
+
+
+.app dl {
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);
+}
+
+
+.app dl dt {
+    padding: 10px 15px;
+    border-bottom: 1px solid transparent;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    background-color: #337ab7;
+    color: #FFF;
+}
+
+
+.app dl dt b {
+    height: 46px;
+    line-height: 46px;
+    display: inline-block;
+}
+
+
+.app dl dt input {
+    vertical-align: middle;
+    margin: 0;
+}
+
+
+.app dl dd {
+    float: left;
+    padding: 15px 10px 15px 20px;
+}
+
+
+.app dl dd span {
+    height: 46px;
+    line-height: 46px;
+    display: inline-block;
+}
+
+
+.app dl dd input {
+    vertical-align: middle;
+    margin: 0;
+}

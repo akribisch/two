@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.UserDao">
+<!-- 全查询 -->
+<select id="query" resultType="com.web.entity.User">
+	select * from user
+</select>
+
+<!-- 添加 -->
+<insert id="addUser" parameterType="com.web.entity.User">
+insert into user(username,uphone,uidcard,sex,birthday) values(#{username},#{uphone},#{uidcard},#{sex},#{birthday})
+</insert>
+
+<!-- 修改 -->
+<update id="updateUser" parameterType="int">
+update user set username =#{username} , uphone = #{uphone},uidcard=#{uidcard},sex=#{sex},birthday=#{birthday} where userid = #{userId}
+</update>
+
+<!-- 删除 -->
+<delete id="delectUser" parameterType="int">
+delete from user where userid = #{userId}
+</delete>
+
+<!-- 通过主键查询 -->
+<select id="queryById" resultType="com.web.entity.User" parameterType="int">
+select * from user where userid = #{userId}
+</select>
+
+<!-- 分页查询用户信息 -->
+<select id="queryPageUser" parameterType="java.util.Map" resultType="com.web.entity.User">
+select * from user where 1 = 1
+<if test="uphone!=null">
+			and uphone=#{uphone}
+		</if>
+		<if test="uidcard!=null">
+			and uidcard=#{uidcard}
+		</if>
+		limit #{prev},#{pageSize}
+</select>
+<!-- 查询用户信息总的条数 -->
+<select id="queryPageUserCount" parameterType="java.util.Map" resultType="int">
+select count(*) from user where 1 = 1
+<if test="uphone!=null">
+			and uphone=#{uphone}
+		</if>
+		<if test="uidcard!=null">
+			and uidcard=#{uidcard}
+		</if>
+</select>
+</mapper>

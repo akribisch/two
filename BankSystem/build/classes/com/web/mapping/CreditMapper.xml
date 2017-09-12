@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.CreditDao">
+	<resultMap type="Credit" id="resultCredit">
+		<id property="creditId" column="creditid"/>
+		<result property="money" column="money"/>
+		<result property="currentTime" column="currenttime"/>
+		<result property="totalTime" column="totaltime"/>
+		<result property="surplusMoney" column="surplusmoney"/>
+		<association property="bank" javaType="Bank">
+			<id property="bankId" column="bankid"/>
+			<result property="bankName" column="bankname"/>
+		</association>
+		<association property="staff" javaType="Staff">
+			<id property="staffId" column="staffid"/>
+			<result property="staffName" column="staffname"/>
+		</association>
+		<association property="savings" javaType="Savings">
+			<id property="savingsId" column="savingsid"/>
+			<result property="savingsNum" column="savingsnum"/>
+		</association>
+		<association property="interest" javaType="Interest">
+			<id property="interestId" column="interestid"/>
+			<result property="interestName" column="interestname"/>
+			<result property="interest" column="interest"/>
+			<result property="interestCycle" column="interestcycle"/>
+		</association>
+	</resultMap>
+	<insert id="insertCredit" parameterType="com.web.entity.Credit">
+		insert into credit (savingsid,bankid,money,currenttime,interestid,staffid,totaltime) 
+		values (#{savings.savingsId},#{bank.bankId},#{money},#{currentTime},#{interest.interestId},#{staff.staffId},#{totalTime})
+	</insert>
+	<update id="updateCredit" parameterType="com.web.entity.Credit">
+		update credit set money=#{money} where creditid=#{creditId}
+	</update>
+	<delete id="deleteCredit" parameterType="int">
+		delete from credit where savingsid=#{savingsId}
+	</delete>
+	<select id="findBySavings" resultMap="resultCredit" parameterType="java.util.Map">
+		select 
+		c.creditid,
+		c.money,
+		c.currenttime,
+		c.totaltime,
+		c.surplusmoney,
+		b.bankid,
+		b.bankname,
+		s.staffid,
+		s.staffname,
+		sav.savingsid,
+		sav.savingsnum,
+		i.interestid,
+		i.interestname,
+		i.interest,
+		i.interestcycle 
+		from credit c,bank b,staff s,savings sav,interest i
+		where c.bankid=b.bankid and s.staffid=c.staffid and sav.savingsid=c.savingsid and i.interestid=c.interestid 
+		and sav.savingsid=#{savingsId} 
+		
+		limit #{startIndex},#{pageSize}
+	</select>
+	<select id="findCreditCount" resultType="int" parameterType="int">
+		select count(*) from credit where savingsid=#{savingsId}
+	</select>
+	
+	<select id="findById" parameterType="int" resultMap="resultCredit">
+		select 
+		c.creditid,
+		c.money,
+		c.currenttime,
+		c.totaltime,
+		c.surplusmoney,
+		b.bankid,
+		b.bankname,
+		s.staffid,
+		s.staffname,
+		sav.savingsid,
+		sav.savingsnum,
+		i.interestid,
+		i.interestname,
+		i.interest,
+		i.interestcycle 
+		from credit c,bank b,staff s,savings sav,interest i
+		where creditId=#{creditId}
+	</select>
+</mapper>

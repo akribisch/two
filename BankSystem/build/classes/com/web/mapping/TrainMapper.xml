@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.TrainDao">
+	<resultMap type="Train" id="resultTrain">
+		<id column="trainid" property="trainId"/>
+		<result column="trainname" property="trainName"/>
+		<result column="trainperson" property="trainPerson"/>
+		<result column="traindate" property="trainDate"/>
+		<association property="station" >
+			<id column="statid" property="statId"/>
+			<result column="statname" property="statName"/>
+		</association>
+		<association property="dep">
+			<id column="depid" property="depId"/>
+			<result column="depname" property="depName"/>
+		</association>
+	</resultMap>
+	<insert id="insertTrain" parameterType="Train">
+		insert into train (trainname,traindate,trainperson,depId,statid) 
+		values (#{trainName},#{trainDate},#{trainPerson},#{dep.depId},#{station.statId})
+	</insert>
+	<update id="updateTrain" parameterType="Train">
+		update train set trainname=#{trainName},traindate=#{trainDate},trainperson=#{trainPerson},depId=#{dep.depId},statid=#{station.statId} 
+		 where trainid=#{trainId}
+	</update>
+	<delete id="deleteTrain" parameterType="int">
+		delete from train where trainid=#{trainId}
+	</delete>
+	<select id="findAllTrain" resultMap="resultTrain">
+		select t.trainid,t.traindate,t.trainname,t.trainperson,s.statid,s.statname,d.depid,d.depname 
+		from train t,station s,department d 
+		where t.statid=s.statid and d.depid=t.depid
+	</select>
+</mapper>

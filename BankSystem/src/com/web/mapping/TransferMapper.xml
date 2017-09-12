@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.TransferDao">
+	
+	<!-- Transfer的自定义结果集返回类型 -->
+	<resultMap type="Transfer" id="resultOfTransfer">
+		<id property="transferId" column="transferid"/>
+		
+		<result property="money" column="money"/>
+		<result property="currentTime" column="currenttime"/>
+		
+		<!-- 转入的储蓄卡实体类 -->
+		<association property="savingsInto" javaType="Savings">
+			<id property="savingsId" column="savingsidinto"/>		
+			<result property="savingsNum" column="intonum"/>
+		</association>
+		
+		<!-- 转出的储蓄卡实体类 -->
+		<association property="savingsOut" javaType="Savings">
+			<id property="savingsId" column="savingsidout"/>		
+			<result property="savingsNum" column="outnum"/>
+		</association>
+		
+		<!-- 员工实体类 -->
+		<association property="staff" javaType="Staff">
+			<id property="staffId" column="staffid"/>		
+			<result property="staffName" column="staffname"/>
+		</association>
+		
+		<!-- 转账状态实体类 -->
+		<association property="transferState" javaType="TransferState">
+			<id property="stateId" column="stateid"/>		
+			<result property="stateName" column="statename"/>
+		</association>
+		
+	</resultMap>
+	
+	<!-- 动态分页查询  -->
+	<select id="select" parameterType="com.web.util.Page" resultMap="resultOfTransfer">
+		select
+			t.transferid,
+			t.savingsidinto,
+			sinto.savingsnum intonum,
+			t.savingsidout,
+			sout.savingsnum outnum,
+			t.money,
+			sta.staffid,
+			sta.staffname,
+			t.currenttime,
+			ts.stateid,
+			ts.statename
+		from
+			transfer t,
+			savings sinto,
+			savings sout,
+			staff sta,
+			transferstate ts
+		where 1 = 1
+			<!-- 转入的储蓄卡编号查询 -->
+			<if test="map.savingsIdInto != 0">
+				and t.savingsidinto = #{map.savingsIdInto}
+			</if>
+			<!-- 转出的储蓄卡编号查询 -->
+			<if test="map.savingsIdOut != 0">
+				and t.savingsidout = #{map.savingsIdOut}
+			</if>
+			<!-- 转账状态编号查询 -->
+			<if test="map.stateId != 0">
+				and t.stateid = #{map.stateId}
+			</if>
+			<!-- 起始时间查询条件 -->
+			<if test="map.beginDate != null and map.beginDate != ''">
+				and t.currenttime <![CDATA[>=]]> #{map.beginDate}
+			</if>
+			<!-- 结束时间查询条件 -->
+ 			<if test="map.endDate != null and map.endDate != ''">
+ 				and t.currenttime <![CDATA[<=]]> #{map.endDate}
+ 			</if>
+			and t.savingsidinto = sinto.savingsid
+			and t.savingsidout = sout.savingsid
+			and t.staffid = sta.staffid
+			and t.stateid = ts.stateid
+		limit #{startIndex},#{pageSize}
+	</select>
+	
+	<!-- 动态分页查询的总条目数  -->
+	<select id="selectCount" parameterType="com.web.util.Page" resultType="int">
+		select
+			count(t.transferid)
+		from
+			transfer t
+		where 1 = 1
+			<!-- 转入的储蓄卡编号查询 -->
+			<if test="map.savingsIdInto != 0">
+				and t.savingsidinto = #{map.savingsIdInto}
+			</if>
+			<!-- 转出的储蓄卡编号查询 -->
+			<if test="map.savingsIdOut != 0">
+				and t.savingsidout = #{map.savingsIdOut}
+			</if>
+			<!-- 转账状态编号查询 -->
+			<if test="map.stateId != 0">
+				and t.stateid = #{map.stateId}
+			</if>
+			<!-- 起始时间查询条件 -->
+			<if test="map.beginDate != null and map.beginDate != ''">
+				and t.currenttime <![CDATA[>=]]> #{map.beginDate}
+			</if>
+			<!-- 结束时间查询条件 -->
+ 			<if test="map.endDate != null and map.endDate != ''">
+ 				and t.currenttime <![CDATA[<=]]> #{map.endDate}
+ 			</if>
+	</select>
+	
+	<!-- 根据主键查询  -->
+	<select id="selectById" parameterType="int" resultMap="resultOfTransfer">
+		select
+			t.transferid,
+			t.savingsidinto,
+			sinto.savingsnum intonum,
+			t.savingsidout,
+			sout.savingsnum outnum,
+			t.money,
+			sta.staffid,
+			sta.staffname,
+			t.currenttime,
+			ts.stateid,
+			ts.statename
+		from
+			transfer t,
+			savings sinto,
+			savings sout,
+			staff sta,
+			transferstate ts
+		where t.transferid = #{transferId}
+			and t.savingsidinto = sinto.savingsid
+			and t.savingsidout = sout.savingsid
+			and t.staffid = sta.staffid
+			and t.stateid = ts.stateid
+	</select>
+	
+	<!-- 添加 -->
+	<insert id="insert" parameterType="Transfer">
+		insert into transfer(savingsidinto,savingsidout,money,staffid,currenttime,stateid) 
+		values(#{savingsInto.savingsId},#{savingsOut.savingsId},#{money},#{staff.staffId},#{currentTime},#{transferState.stateId})
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="deleteById" parameterType="int">
+		delete from transfer where transferid = #{transferId}
+	</delete>
+	
+	<!-- 修改 -->
+	<update id="updateById" parameterType="Transfer">
+		update transfer
+		<set>
+			<if test="savingsInto.savingsId != 0">
+				savingsidinto = #{savingsInto.savingsId}
+			</if>
+			<if test="savingsOut.savingsId != 0">
+				savingsidout = #{savingsOut.savingsId}
+			</if>
+			<if test="money != 0">
+				money = #{money}
+			</if>
+			<if test="staff.staffId != 0">
+				staffid = #{staff.staffId}
+			</if>
+			<if test="currentTime != null">
+				currenttime = #{currentTime}
+			</if>
+			<if test="transferState.stateId != 0">
+				stateid = #{transferState.stateId}
+			</if>
+		</set>
+		where transferid = #{transferId}
+	</update>
+	
+</mapper>
