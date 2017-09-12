@@ -1,0 +1,11 @@
+url=jdbc\:mysql\://localhost\:3306/Amusement
+driver=com.mysql.jdbc.Driver
+user=liqh
+password=123456
+jdbc.initialPoolSize=20
+jdbc.maxPoolSize=100
+jdbc.minPoolSize=10
+jdbc.maxIdleTime=600
+jdbc.acquireIncrement=5
+jdbc.maxStatements=5
+jdbc.idleConnectionTestPeriod=60
